@@ -42,9 +42,26 @@ public class ProductService {
     @Transactional
     public Product save(ProductDto dto) {
         Product product = new Product(
-                dto.getName(), dto.getPrice(), dto.getDescription(), dto.getStock()
+                dto.getName(),
+                dto.getPrice(),
+                dto.getDescription(),
+                dto.getStock()
         );
+
         return productRepository.save(product);
+    }
+
+    @Transactional
+    public Product updateProduct(Long id, ProductDto dto) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("상품을 찾을 수 없습니다: " + id));
+
+        product.setName(dto.getName());
+        product.setPrice(dto.getPrice());
+        product.setDescription(dto.getDescription());
+        product.setStock(dto.getStock());
+
+        return product;
     }
 
     @Transactional

@@ -23,20 +23,30 @@
 <nav class="navbar navbar-expand-lg navbar-dark mb-4">
     <div class="container">
         <a class="navbar-brand" th:href="@{/home}">HanSung</a>
+
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navMenu">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" th:href="@{/home}">홈</a></li>
-                <li class="nav-item"><a class="nav-link active" th:href="@{/products}">상품 목록</a></li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/home}">홈</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/products}">상품 목록</a>
+                </li>
+
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" th:href="@{/products/add}">상품 등록</a>
                 </li>
+
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" th:href="@{/admin/dashboard}">관리자</a>
                 </li>
             </ul>
+
             <form th:action="@{/logout}" method="post" class="d-flex">
                 <button class="btn btn-outline-light btn-sm px-3">로그아웃</button>
             </form>
@@ -60,8 +70,12 @@
                 / <span th:text="${productPage.totalPages}"></span>)
             </small>
         </div>
-        <a th:href="@{/products/add}" class="btn btn-danger btn-sm px-4 fw-semibold"
-           sec:authorize="hasRole('ADMIN')">+ 상품 등록</a>
+
+        <a th:href="@{/products/add}"
+           class="btn btn-danger btn-sm px-4 fw-semibold"
+           sec:authorize="hasRole('ADMIN')">
+            + 상품 등록
+        </a>
     </div>
 
     <!-- 검색 폼 -->
@@ -71,6 +85,7 @@
                class="form-control"
                placeholder="상품명으로 검색"
                th:value="${keyword}">
+
         <button type="submit" class="btn btn-primary px-4">검색</button>
         <a th:href="@{/products}" class="btn btn-outline-secondary">초기화</a>
     </form>
@@ -95,32 +110,52 @@
                         <th class="text-center" sec:authorize="hasRole('ADMIN')">관리</th>
                     </tr>
                     </thead>
+
                     <tbody>
                     <tr th:each="p : ${productPage.content}">
                         <td class="ps-4 text-muted small" th:text="${p.id}"></td>
+
                         <td>
                             <a th:href="@{/products/{id}(id=${p.id})}"
                                class="text-decoration-none fw-semibold text-dark"
                                th:text="${p.name}"></a>
                         </td>
+
                         <td class="text-muted small" th:text="${p.description}"></td>
+
                         <td class="text-end product-price"
                             th:text="${#numbers.formatInteger(p.price, 1, 'COMMA') + '원'}"></td>
+
                         <td class="text-center">
-                                <span th:if="${p.stock > 10}" class="badge badge-stock-high"
-                                      th:text="${p.stock}"></span>
-                            <span th:if="${p.stock > 0 and p.stock <= 10}" class="badge badge-stock-low"
+                            <span th:if="${p.stock > 10}"
+                                  class="badge badge-stock-high"
                                   th:text="${p.stock}"></span>
-                            <span th:if="${p.stock == 0}" class="badge badge-stock-out">품절</span>
+
+                            <span th:if="${p.stock > 0 and p.stock <= 10}"
+                                  class="badge badge-stock-low"
+                                  th:text="${p.stock}"></span>
+
+                            <span th:if="${p.stock == 0}"
+                                  class="badge badge-stock-out">품절</span>
                         </td>
+
                         <td class="text-center text-muted small"
                             th:text="${#temporals.format(p.createdAt, 'yyyy-MM-dd')}"></td>
+
                         <td class="text-center" sec:authorize="hasRole('ADMIN')">
                             <div class="d-flex justify-content-center gap-2">
-                                <form th:action="@{/products/{id}/delete(id=${p.id})}" method="post"
+
+                                <a th:href="@{/products/{id}/edit(id=${p.id})}"
+                                   class="btn btn-outline-primary btn-sm">
+                                    수정
+                                </a>
+
+                                <form th:action="@{/products/{id}/delete(id=${p.id})}"
+                                      method="post"
                                       onsubmit="return confirm('삭제하시겠습니까?')">
-                                    <button class="btn btn-outline-danger btn-sm">삭제</button>
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">삭제</button>
                                 </form>
+
                             </div>
                         </td>
                     </tr>
@@ -139,6 +174,7 @@
             <li class="page-item disabled" th:if="${!productPage.hasPrevious()}">
                 <span class="page-link">이전</span>
             </li>
+
             <li class="page-item" th:unless="${!productPage.hasPrevious()}">
                 <a class="page-link"
                    th:href="${keyword != null}
@@ -164,6 +200,7 @@
             <li class="page-item disabled" th:if="${!productPage.hasNext()}">
                 <span class="page-link">다음</span>
             </li>
+
             <li class="page-item" th:unless="${!productPage.hasNext()}">
                 <a class="page-link"
                    th:href="${keyword != null}

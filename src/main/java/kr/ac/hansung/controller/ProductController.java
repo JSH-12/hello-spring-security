@@ -10,6 +10,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping("/products")
@@ -56,8 +60,53 @@ public class ProductController {
     }
 
     @PostMapping
-    public String save(@ModelAttribute ProductDto dto) {
+    public String save(@ModelAttribute("product") ProductDto dto, Model model) {
+        List<String> errors = validateProductDto(dto);
+
+        if (!errors.isEmpty()) {
+            model.addAttribute("errors", errors);
+            model.addAttribute("product", dto);
+            return "products/add";
+        }
+
         productService.save(dto);
+        return "redirect:/products";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String editProductForm(@PathVariable Long id, Model model) {
+        Product product = productService.findById(id);
+
+        ProductDto productDto = new ProductDto();
+        productDto.setName(product.getName());
+        productDto.setPrice(product.getPrice());
+        productDto.setDescription(product.getDescription());
+        productDto.setStock(product.getStock());
+
+        model.addAttribute("productDto", productDto);
+        model.addAttribute("productId", id);
+
+        return "products/edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String editProduct(@PathVariable Long id,
+                              @ModelAttribute("productDto") ProductDto productDto,
+                              Model model,
+                              RedirectAttributes redirectAttributes) {
+
+        List<String> errors = validateProductDto(productDto);
+
+        if (!errors.isEmpty()) {
+            model.addAttribute("errors", errors);
+            model.addAttribute("productDto", productDto);
+            model.addAttribute("productId", id);
+            return "products/edit";
+        }
+
+        productService.updateProduct(id, productDto);
+        redirectAttributes.addFlashAttribute("successMessage", "상품이 수정되었습니다.");
+
         return "redirect:/products";
     }
 
@@ -65,5 +114,23 @@ public class ProductController {
     public String delete(@PathVariable Long id) {
         productService.deleteById(id);
         return "redirect:/products";
+    }
+
+    private List<String> validateProductDto(ProductDto dto) {
+        List<String> errors = new ArrayList<>();
+
+        if (dto.getName() == null || dto.getName().isBlank()) {
+            errors.add("상품명을 입력하세요.");
+        }
+
+        if (dto.getPrice() < 0) {
+            errors.add("가격은 0원 이상이어야 합니다.");
+        }
+
+        if (dto.getStock() < 0) {
+            errors.add("재고는 0개 이상이어야 합니다.");
+        }
+
+        return errors;
     }
 }
